@@ -4,18 +4,21 @@ use strict;
 use warnings;
 use base qw(Template::Plugin::Filter);
 
-our $VERSION = '0.01';
+our $VERSION = '1.000';
 
 sub init {
     my ($self) = @_;
     $self->{'_DYNAMIC'} = 1;
-    $self->install_filter( 'nofollow' );
+    $self->install_filter( $self->{'_ARGS'}->[0] || 'nofollow' );
     return $self;
 }
 
 sub filter {
     my ($self, $text) = @_;
-    $text =~ s/(<\s*a)(\s+href)/$1 rel="nofollow"$2/gsmi;
+    # remove any existing rel="nofollow" attrs
+    $text =~ s/(<\s*a)([^>]*)\srel\s*=\s*"?nofollow"?([^>]*>)/$1$2$3/gsmi;
+    # add in our rel="nofollow" attr
+    $text =~ s/(<\s*a)([^>]*>)/$1 rel="nofollow"$2/gsmi;
     return $text;
 };
 
